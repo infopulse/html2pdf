@@ -1,3 +1,6 @@
 .idea
 venv
 output
+state.json
+build
+dist

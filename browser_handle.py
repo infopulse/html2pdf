@@ -1,7 +1,7 @@
 from playwright.sync_api import sync_playwright, Browser
 from settings import BASE_URL
 from typing import NamedTuple
-from misc import check_browser_state, join_pdfs, delete_files
+from misc import check_browser_state, join_pdfs, delete_files, find_chrome
 from typing import Callable
 from new_recorder import Recorder
 
@@ -19,7 +19,9 @@ def authenticate(username: str, password: str, headless: bool = True) -> Status:
         return Status(True, '✅ Already authenticated')
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
+        browser = p.chromium.launch(
+            headless=headless,
+            executable_path=find_chrome())
         context = browser.new_context()
         page = context.new_page()
         try:
@@ -37,7 +39,9 @@ def authenticate(username: str, password: str, headless: bool = True) -> Status:
 def parse_the_page(url: str, output_folder: str, progress: Callable, headless: bool = False) -> None:
     with sync_playwright() as p:
         viewport = {'width': 1024, 'height': 800}
-        browser = p.chromium.launch(headless=headless)
+        browser = p.chromium.launch(
+            headless=headless,
+            executable_path=find_chrome())
         context = browser.new_context(
             storage_state=state_file,
             viewport=viewport,
@@ -48,8 +52,10 @@ def parse_the_page(url: str, output_folder: str, progress: Callable, headless: b
 
         progress('page created')
         recorder = Recorder(page, output_folder, progress)
-        title = recorder.goto(url)
-        files = recorder.save_pdf()
-        print('all files --->> ', files)
-        join_pdfs(files, output_folder, title)
-        delete_files(files)
+        try:
+            title = recorder.goto(url)
+            files = recorder.save_pdf()
+            join_pdfs(files, output_folder, title)
+            delete_files(files)
+        except Exception as e:
+            progress(f'❌ {str(e)}')
