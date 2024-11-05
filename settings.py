@@ -1,1 +1,0 @@
-BASE_URL = 'https://accord.kineoadapt.com/#user/login'
