@@ -2,7 +2,7 @@ import json
 from recorder2 import main
 from s3_connect import upload_files_to_s3
 
-def lambda_handler(event, context):
+def handler(event, context):
     if event['httpMethod'] == 'POST':
         try:
             body = json.loads(event['body'])

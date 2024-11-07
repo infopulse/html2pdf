@@ -9,3 +9,5 @@
 8. Build the Docker image
 
 nice guide https://www.youtube.com/watch?v=23fE57EFRK4
+
+docker guide: https://docs.aws.amazon.com/lambda/latest/dg/python-image.html#python-image-instructions

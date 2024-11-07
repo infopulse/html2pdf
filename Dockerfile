@@ -1,9 +1,30 @@
-# Use the official Python image from the Docker Hub
+# Define custom function directory
+ARG FUNCTION_DIR="/function"
+
+FROM python:3.12 AS build-image
+
+# Include global arg in this stage of the build
+ARG FUNCTION_DIR
+
+# Copy function code
+RUN mkdir -p ${FUNCTION_DIR}
+COPY app ${FUNCTION_DIR}
+
+# Install the function's dependencies
+RUN pip install \
+    --target ${FUNCTION_DIR} \
+        awslambdaric playwright pypdf boto3
+
+# Use a slim version of the base Python image to reduce the final image size
 FROM python:3.12-slim
 
-RUN pip install --no-cache-dir awslambdaric
+# Include global arg in this stage of the build
+ARG FUNCTION_DIR
+# Set working directory to function root directory
+WORKDIR ${FUNCTION_DIR}
 
-# Install system dependencies
+# Copy in the built dependencies
+COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
 RUN apt-get update && apt-get install -y \
     curl\
     wget \
@@ -36,16 +57,11 @@ RUN apt-get update && apt-get install -y \
     libnspr4 \
     libgbm1 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
 
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
-    apt-get install -y nodejs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN pip install playwright pypdf boto3
 RUN playwright install chromium
 
-COPY . /var/task
-
-CMD ["python3", "-m", "awslambdaric", "lambda_function.lambda_handler"]
+# Set runtime interface client as default command for the container runtime
+ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
+# Pass the name of the function handler as an argument to the runtime
+CMD [ "lambda_function.handler" ]
