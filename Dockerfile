@@ -22,6 +22,8 @@ FROM python:3.12-slim
 ARG FUNCTION_DIR
 # Set working directory to function root directory
 WORKDIR ${FUNCTION_DIR}
+# Add the playwright path to python in order to call it
+ENV PYTHONPATH="${PYTHONPATH}:/funcion/playwright"
 
 # Copy in the built dependencies
 COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
@@ -57,11 +59,16 @@ RUN apt-get update && apt-get install -y \
     libnspr4 \
     libgbm1 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN playwright install chromium
+# this should solve the "running things locally" error
+RUN mkdir -p /root/.aws-lambda-rie && curl -LJ --output /root/.aws-lambda-rie/aws-lambda-rie  https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie
+RUN chmod +x /root/.aws-lambda-rie/aws-lambda-rie
+RUN python /function/playwright install chromium
 
 # Set runtime interface client as default command for the container runtime
-ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
+#ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
+# This new entrypoint should only be used, when running locally.
+ENTRYPOINT [ "/root/.aws-lambda-rie/aws-lambda-rie","/usr/local/bin/python", "-m", "awslambdaric" ]
 # Pass the name of the function handler as an argument to the runtime
 CMD [ "lambda_function.handler" ]
