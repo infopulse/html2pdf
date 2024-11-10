@@ -1,9 +1,10 @@
 import json
+import os
 from recorder2 import main
 from s3_connect import upload_files_to_s3
 
 def handler(event, context):
-    if event['httpMethod'] == 'POST':
+    if event.get('httpMethod') == 'POST':
         try:
             body = json.loads(event['body'])
         except json.JSONDecodeError:
@@ -13,7 +14,6 @@ def handler(event, context):
                     {
                         "status": "error",
                         "message": "Invalid JSON",
-                        "links": []
                     }
                 )
             }
@@ -24,7 +24,6 @@ def handler(event, context):
                 {
                     "status": "error",
                     "message": "Method Not Allowed",
-                    "links": []
                 }
             )
         }
@@ -33,16 +32,26 @@ def handler(event, context):
         username = body['username']
         password = body['password']
         links = body['links']
-        s3_bucket_url = body['s3_bucket_url']
-        s3_bucket_access_key = body['s3_bucket_access_key']
     except KeyError:
         return {
             "statusCode": 400,
             "body": json.dumps(
                 {
                     "status": "error",
-                    "message": "Missing required field",
-                    "links": []
+                    "message": "Missing required fields: username, password, links",
+                }
+            )
+        }
+
+    s3_bucket_url = os.environ.get('S3_BUCKET_URL')
+    s3_bucket_access_key = os.environ.get('S3_BUCKET_ACCESS_KEY')
+    if s3_bucket_url is None or s3_bucket_access_key is None:
+        return {
+            "statusCode": 500,
+            "body": json.dumps(
+                {
+                    "status": "error",
+                    "message": "Missing S3 configuration",
                 }
             )
         }
@@ -56,7 +65,7 @@ def handler(event, context):
             "body": json.dumps(
                 {
                     "status": "success",
-                    "message": "Hello from Lambda!",
+                    "message": "pages parsed and uploaded to S3",
                     "links": urls
                 }
             )

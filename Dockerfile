@@ -13,7 +13,7 @@ COPY app ${FUNCTION_DIR}
 # Install the function's dependencies
 RUN pip install \
     --target ${FUNCTION_DIR} \
-        awslambdaric playwright pypdf boto3
+        awslambdaric playwright pypdf boto3 reportlab
 
 # Use a slim version of the base Python image to reduce the final image size
 FROM python:3.12-slim
@@ -61,14 +61,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# this should solve the "running things locally" error
-RUN mkdir -p /root/.aws-lambda-rie && curl -LJ --output /root/.aws-lambda-rie/aws-lambda-rie  https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie
-RUN chmod +x /root/.aws-lambda-rie/aws-lambda-rie
 RUN python /function/playwright install chromium
 
-# Set runtime interface client as default command for the container runtime
-#ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
-# This new entrypoint should only be used, when running locally.
-ENTRYPOINT [ "/root/.aws-lambda-rie/aws-lambda-rie","/usr/local/bin/python", "-m", "awslambdaric" ]
-# Pass the name of the function handler as an argument to the runtime
-CMD [ "lambda_function.handler" ]
+ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
+CMD [ "lambda_function2.handler" ]
