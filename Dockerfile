@@ -64,4 +64,4 @@ RUN apt-get update && apt-get install -y \
 RUN python /function/playwright install chromium
 
 ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
-CMD [ "lambda_function2.handler" ]
+CMD [ "lambda_function.handler" ]
