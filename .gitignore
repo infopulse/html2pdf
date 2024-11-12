@@ -4,3 +4,5 @@ output
 state.json
 build
 dist
+test.http
+output.zip

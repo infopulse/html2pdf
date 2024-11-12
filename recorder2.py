@@ -1,3 +1,4 @@
+import os
 import re
 import logging
 from pathlib import Path
@@ -177,9 +178,11 @@ class Recorder:
 
 
 def main(username: str, password: str, links: list[str], headless: bool = True):
+    # chromium_bin = Path(os.getenv('PLAYWRIGHT_BROWSERS_PATH', '/usr/local/share/playwright'))
     with sync_playwright() as p:
         log.info('Starting browser')
         browser = p.chromium.launch(headless=headless)
+        # browser = p.chromium.launch(headless=headless, executable_path=chromium_bin / 'chrome')
         context = browser.new_context(
             viewport={'width': 1024, 'height': 800},
             ignore_https_errors=True)

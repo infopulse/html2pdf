@@ -8,23 +8,40 @@ document.getElementById('parse-btn').addEventListener('click', function() {
     const urls = document.getElementById('urls').value.split('\n');
 
     const data = {
-        email: username,
+        username: username,
         password: password,
-        urls: urls
+        links: urls
     };
 
-    fetch('/parse', {
+    fetch('/html2pdf', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        } else {
+            return response.json().then(err => { throw new Error(err.message); });
+        }
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'output.zip'; // Set the file name
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
     })
     .catch((error) => {
         console.error('Error:', error);
+    })
+    .finally(() => {
+        parseBtn.disabled = false; // Re-enable the button
+        parseBtn.classList.remove('disabled'); // Remove disabled class
     });
 });

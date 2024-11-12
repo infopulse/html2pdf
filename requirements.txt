@@ -1,3 +1,5 @@
 playwright
 pypdf
 boto3
+flask
+gunicorn

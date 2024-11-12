@@ -1,41 +1,13 @@
-# AWS setup guide
-
-1. Build the docker image
-2. Create ECR and upload the docker image to it
-3. Create Lambda function using the docker image
-4. Set environment variables for the Lambda function:
-    - S3_BUCKET_URL
-    - S3_BUCKET_ACCESS_KEY
-5. Create API Gateway and link it to the Lambda function
-
-# Usage
-
-- Send a POST request to the API Gateway with the following body:
-
-``` json
-{
-    "username": "user",
-    "password": "password",
-    "links": [
-        "https://123456",
-        "https://456789"
-    ]
-}
-```
-
-- The lambda function will parse the web pages, save them to PDF and upload them to the S3 bucket.
-- The lambda function will return the S3 bucket URL where the PDFs are stored.
-
-``` json
- {
-   "status": "success",
-   "message": "pages parsed and uploaded to S3",
-   "links": [
-       "https://s3.amazonaws.com/bucket-name/123456.pdf",
-       "https://s3.amazonaws.com/bucket-name/456789.pdf"
-   ]
-}
-```
-# Next steps
-- Create another lambda function with static html to call the API Gateway and display the PDFs in a web page.
-- As example use the example in the static folder
+# setup guide
+1. Run the linux server (guide created for ubuntu 22.04)
+2. Clone the repository
+3. Create a virtual environment 'python3 -m venv .venv'
+4. Install the requirements 'pip install -r requirements.txt'
+5. Install the Playwright browser 'python -m playwright install chromium'
+6. Copy the `html2pdf.service` file to `/etc/systemd/system/`
+7. Update the `html2pdf.service` file with the correct configuration
+8. Reload the systemd daemon `sudo systemctl daemon-reload`
+9. Start the service `sudo systemctl start html2pdf`
+10. Enable the service `sudo systemctl enable html2pdf`
+11. Configure the nginx server to proxy the service to the correct port (127.0.0.1:8123)
+12. Restart the nginx server `sudo systemctl restart nginx`

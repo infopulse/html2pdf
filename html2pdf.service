@@ -1,0 +1,15 @@
+[Unit]
+Description=Service to convert html pages from accord.kineoadapt.com to pdf
+After=network.target
+
+[Service]
+# set your user and group
+User=www-data
+Group=www-data
+# set your working directory
+WorkingDirectory=/home/user/projects/html2pdf
+ExecStart=/home/user/projects/html2pdf/.venv/bin/gunicorn --workers 4 --bind 127.0.0.1:8123 app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
