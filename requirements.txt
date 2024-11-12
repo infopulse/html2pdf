@@ -3,3 +3,4 @@ pypdf
 boto3
 flask
 gunicorn
+reportlab
