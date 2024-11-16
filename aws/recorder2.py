@@ -180,13 +180,7 @@ class Recorder:
 def main(username: str, password: str, links: list[str], headless: bool = True):
     with sync_playwright() as p:
         log.info('Starting browser')
-        browser_type = os.getenv('BROWSER_TYPE', 'firefox')
-        if browser_type == 'firefox':
-            browser = p.firefox.launch(headless=headless)
-        elif browser_type == 'chromium':
-            browser = p.chromium.launch(headless=headless)
-        else:
-            raise ValueError(f'Unknown browser type: {browser_type}')
+        browser = p.chromium.launch(headless=headless)
         context = browser.new_context(
             viewport={'width': 1024, 'height': 800},
             ignore_https_errors=True)
