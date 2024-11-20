@@ -1,5 +1,6 @@
 FROM python:3.12-slim
 
+# Install system dependencies, including Mesa for software rendering
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libnss3 \
@@ -17,22 +18,46 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xdg-utils \
     libasound2 \
     fonts-liberation \
+    libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    mesa-utils \
+    xvfb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ARG FUNCTION_DIR="/function"
-ENV PYTHONPATH="${PYTHONPATH}:/funcion/playwright"
-ENV PLAYWRIGHT_BROWSERS_PATH="/usr/local/share/playwright"
-ENV PLAYWRIGHT_CHROMIUM_ARGS="--no-sandbox  --disable-dev-shm-usage"
+# Pre-create writable directory for non-root use
+RUN mkdir -p /home/nonroot/.X11-unix && chmod 1777 /home/nonroot/.X11-unix
 
+# Set environment variables for software rendering and TMPDIR
+ENV LIBGL_ALWAYS_SOFTWARE=1
+ENV DISPLAY=:99
+ENV TMPDIR=/home/nonroot
+ENV XDG_RUNTIME_DIR=/home/nonroot
+
+# Set function directory
+ARG FUNCTION_DIR="/function"
+ENV PYTHONPATH="${PYTHONPATH}:${FUNCTION_DIR}/playwright"
+ENV PLAYWRIGHT_BROWSERS_PATH="/usr/local/share/playwright"
+ENV PLAYWRIGHT_CHROMIUM_ARGS="--no-sandbox --disable-dev-shm-usage"
+
+# Create working directory
 RUN mkdir -p ${FUNCTION_DIR}
 WORKDIR ${FUNCTION_DIR}
 
-RUN pip install --no-cache-dir playwright awslambdaric playwright pypdf boto3 reportlab
-RUN playwright install chromium
-RUN chmod -R 777 /usr/local/share/playwright
+# Install Python dependencies
+RUN pip install --no-cache-dir playwright awslambdaric pypdf boto3 reportlab
 
+# Install Playwright browsers
+RUN playwright install-deps
+RUN playwright install
+
+# Adjust permissions (if necessary)
+RUN chmod -R 755 /usr/local/share/playwright
+
+# Copy Lambda function code
 COPY aws ${FUNCTION_DIR}
 
-ENTRYPOINT [ "python3", "-m", "awslambdaric" ]
-CMD [ "lambda_function.handler" ]
+# Start Xvfb before the Lambda handler
+#ENTRYPOINT ["/bin/bash", "-c", "Xvfb :99 -screen 0 1280x1024x24 -fbdir ${TMPDIR} & python3 -m awslambdaric"]
+ENTRYPOINT ["/bin/bash", "-c", "python3 -m awslambdaric"]
+CMD ["lambda_function.handler"]
