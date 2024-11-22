@@ -57,7 +57,4 @@ RUN chmod -R 755 /usr/local/share/playwright
 # Copy Lambda function code
 COPY aws ${FUNCTION_DIR}
 
-# Start Xvfb before the Lambda handler
-#ENTRYPOINT ["/bin/bash", "-c", "Xvfb :99 -screen 0 1280x1024x24 -fbdir ${TMPDIR} & python3 -m awslambdaric"]
-ENTRYPOINT ["/bin/bash", "-c", "python3 -m awslambdaric"]
-CMD ["lambda_function.handler"]
+
