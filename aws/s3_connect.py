@@ -1,7 +1,14 @@
 import os
 import boto3
+import logging
 from urllib.parse import urljoin
 from pathlib import Path
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+log.addHandler(handler)
 
 
 def upload_files_to_s3(folder_path: str,
@@ -9,6 +16,9 @@ def upload_files_to_s3(folder_path: str,
                        s3_base_url: str) -> list[str]:
     s3 = boto3.client('s3')
     file_urls = []
+
+    output_folder = Path(folder_path)
+    log.debug(f"looking for files in {output_folder.absolute()}")
 
     for file in Path(folder_path).iterdir():
         if file.is_file():
