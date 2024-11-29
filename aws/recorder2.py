@@ -192,6 +192,7 @@ def main(username: str, password: str, links: list[str], headless: bool = True):
             recorder = Recorder(page, BASE_URL)
             recorder.login(username, password)
             recorder.save_pages(links)
+            log.info('Pages saved')
     except Exception as e:
         return {"statusCode": 500, "body": str(e)}
 
