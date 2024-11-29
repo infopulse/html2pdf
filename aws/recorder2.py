@@ -178,19 +178,23 @@ class Recorder:
 
 
 def main(username: str, password: str, links: list[str], headless: bool = True):
-    with sync_playwright() as p:
-        log.info('Starting browser')
-        browser = p.chromium.launch(headless=headless)
-        context = browser.new_context(
-            viewport={'width': 1024, 'height': 800},
-            ignore_https_errors=True)
-        context.set_default_timeout(15_000)
-        page = context.new_page()
-        page.emulate_media(media="screen")
-        log.info('launching recorder')
-        recorder = Recorder(page, BASE_URL)
-        recorder.login(username, password)
-        recorder.save_pages(links)
+    try:
+         with sync_playwright() as p:
+            log.info('Starting browser')
+            browser = p.chromium.launch(args=['--disable-gpu', '--single-process', '--headless=new'], headless=headless)
+            context = browser.new_context(
+                viewport={'width': 1024, 'height': 800},
+                ignore_https_errors=True)
+            context.set_default_timeout(15_000)
+            page = context.new_page()
+            page.emulate_media(media="screen")
+            log.info('launching recorder')
+            recorder = Recorder(page, BASE_URL)
+            recorder.login(username, password)
+            recorder.save_pages(links)
+    except Exception as e:
+        return {"statusCode": 500, "body": str(e)}
+
 
 if __name__ == "__main__":
     pages = []
