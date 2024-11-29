@@ -155,8 +155,12 @@ class Recorder:
 
     def save_pdf(self, file_name: str):
         log.info(f'Saving PDF')
+        output = Path('output')
+        os.makedirs(output, exist_ok=True)
+        log.debug(f'output folder created: {output.absolute()}')
         pdf_buffer = BytesIO()
         c = None
+        log.debug(f'Number of blocks: {len(self.page_blocks)}')
         for block in self.page_blocks:
             img_buffer = BytesIO(block)
             img = ImageReader(img_buffer)
@@ -169,13 +173,10 @@ class Recorder:
             c.showPage()
         c.save()
         pdf_buffer.seek(0)
-        output = Path('output')
-        os.makedirs(output, exist_ok=True)
         file_path = output / file_name
-        log.debug(f'PDF saved to {file_path.absolute()}')
         with open(file_path, "wb") as f:
             f.write(pdf_buffer.getbuffer())
-        log.info(f'PDF saved to {file_name}')
+        log.info(f'PDF saved to {file_path.absolute()}')
 
 
 def main(username: str, password: str, links: list[str], headless: bool = True):

@@ -1,63 +1,43 @@
-FROM python:3.12-slim
+# Use AWS Lambda Python runtime as base image
+FROM public.ecr.aws/lambda/python:3.12
 
-# Install system dependencies, including Mesa for software rendering
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    libasound2 \
-    fonts-liberation \
-    libgl1-mesa-glx \
-    libgl1-mesa-dri \
-    mesa-utils \
-    xvfb \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Pre-create writable directory for non-root use
-RUN mkdir -p /home/nonroot/.X11-unix && chmod 1777 /home/nonroot/.X11-unix
-
-# Set environment variables for software rendering and TMPDIR
-ENV LIBGL_ALWAYS_SOFTWARE=1
-ENV DISPLAY=:99
-ENV TMPDIR=/home/nonroot
-ENV XDG_RUNTIME_DIR=/home/nonroot
-
-# Set function directory
-ARG FUNCTION_DIR="/function"
-ENV PYTHONPATH="${PYTHONPATH}:${FUNCTION_DIR}/playwright"
-ENV PLAYWRIGHT_BROWSERS_PATH="/usr/local/share/playwright"
-ENV PLAYWRIGHT_CHROMIUM_ARGS="--no-sandbox --disable-dev-shm-usage"
-
-# Create working directory
-RUN mkdir -p ${FUNCTION_DIR}
-WORKDIR ${FUNCTION_DIR}
+# Copy Python dependencies
+COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
 # Install Python dependencies
-RUN pip install --no-cache-dir playwright awslambdaric pypdf boto3 reportlab
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers
-RUN playwright install-deps
-RUN playwright install chromium
+# Install Playwright system dependencies manually with dnf
+RUN dnf install -y \
+    nss \
+    atk \
+    at-spi2-atk \
+    cups-libs \
+    dbus-libs \
+    libX11 \
+    libXcomposite \
+    libXdamage \
+    libXext \
+    libXfixes \
+    libXrandr \
+    libxcb \
+    libxkbcommon \
+    mesa-libgbm \
+    libdrm \
+    alsa-lib \
+    liberation-fonts \
+    libXScrnSaver \
+    xorg-x11-server-Xvfb \
+    && dnf clean all
 
-# Adjust permissions (if necessary)
-RUN chmod -R 755 /usr/local/share/playwright
+# Install Playwright and its browsers
+RUN pip install --no-cache-dir playwright && \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright-browsers playwright install chromium
 
-# Copy Lambda function code
-COPY aws ${FUNCTION_DIR}
+# Copy AWS Lambda function code
+COPY aws/* ${LAMBDA_TASK_ROOT}
 
-# Start Xvfb before the Lambda handler
-#ENTRYPOINT ["/bin/bash", "-c", "Xvfb :99 -screen 0 1280x1024x24 -fbdir ${TMPDIR} & python3 -m awslambdaric"]
-ENTRYPOINT ["/bin/bash", "-c", "python3 -m awslambdaric"]
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright-browsers
+
+# Define the Lambda handler
 CMD ["lambda_function.handler"]

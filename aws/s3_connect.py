@@ -20,7 +20,7 @@ def upload_files_to_s3(folder_path: str,
     output_folder = Path(folder_path)
     log.debug(f"looking for files in {output_folder.absolute()}")
 
-    for file in Path(folder_path).iterdir():
+    for file in output_folder.iterdir():
         if file.is_file():
             s3_key = file.name
             try:
