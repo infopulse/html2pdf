@@ -6,6 +6,11 @@ from s3_connect import upload_files_to_s3
 def handler(event, context):
     print(event)
 
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            "statusCode": 200
+        }
+
     if event.get('httpMethod') == 'POST':
         try:
             body = json.loads(event['body'])

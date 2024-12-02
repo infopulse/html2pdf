@@ -15,6 +15,7 @@ body {
 
 .container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
@@ -32,6 +33,10 @@ body {
 
 .form-group {
     margin-bottom: 20px;
+}
+
+.result-links-list {
+    margin: 20px 0;
 }
 
 .form-group label {
@@ -88,7 +93,42 @@ button:hover {
     }
 }
 
-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+/* Disabled button style */
+button.disabled {
+    background-color: #d3d3d3; /* Light gray */
+    color: #a1a1a1; /* Muted text color */
+    cursor: not-allowed; /* Disabled cursor */
+    opacity: 0.7;
+}
+
+/* Loading button style */
+button.loading {
+    position: relative;
+    color: transparent; /* Hide button text while loading */
+    pointer-events: none; /* Disable interactions */
+}
+
+/* Spinner inside the loading button */
+button.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-top: 2px solid #007bff; /* Customize with your primary color */
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+/* Spinner animation */
+@keyframes spin {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
 }
