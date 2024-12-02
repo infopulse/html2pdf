@@ -33,7 +33,6 @@ RUN dnf install -y \
 RUN pip install --no-cache-dir playwright && \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright-browsers playwright install chromium
 
-
 # Copy AWS Lambda function code
 COPY aws/* ${LAMBDA_TASK_ROOT}
 

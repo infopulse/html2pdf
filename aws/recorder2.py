@@ -169,10 +169,9 @@ class Recorder:
             c.showPage()
         c.save()
         pdf_buffer.seek(0)
-        output = Path('output')
+        output = '/tmp/output'
         os.makedirs(output, exist_ok=True)
-        file_path = output / file_name
-        log.debug(f'PDF saved to {file_path.absolute()}')
+        file_path = f'{output}/{file_name}'
         with open(file_path, "wb") as f:
             f.write(pdf_buffer.getbuffer())
         log.info(f'PDF saved to {file_name}')

@@ -46,8 +46,7 @@ def handler(event, context):
         }
 
     s3_bucket_url = os.environ.get('S3_BUCKET_URL')
-    s3_bucket_access_key = os.environ.get('S3_BUCKET_ACCESS_KEY')
-    if s3_bucket_url is None or s3_bucket_access_key is None:
+    if s3_bucket_url is None:
         return {
             "statusCode": 500,
             "body": json.dumps(
@@ -60,7 +59,7 @@ def handler(event, context):
 
     try:
         main(username, password, links)
-        urls = upload_files_to_s3('output', s3_bucket_url, s3_bucket_access_key)
+        urls = upload_files_to_s3('/tmp/output', s3_bucket_url)
 
         return {
             "statusCode": 200,

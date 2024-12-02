@@ -169,7 +169,7 @@ class Recorder:
             c.showPage()
         c.save()
         pdf_buffer.seek(0)
-        output = Path('output')
+        output = '/tmp/output'
         if not output.exists():
             output.mkdir()
         with open(output / file_name, "wb") as f:
