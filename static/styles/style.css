@@ -23,6 +23,7 @@ body {
 }
 
 .login-box {
+    overflow: scroll;
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -131,4 +132,12 @@ button.loading::after {
     to {
         transform: translate(-50%, -50%) rotate(360deg);
     }
+}
+
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
 }

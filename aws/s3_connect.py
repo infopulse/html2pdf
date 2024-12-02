@@ -3,6 +3,8 @@ import boto3
 import logging
 from urllib.parse import urljoin
 from pathlib import Path
+import shutil
+import os
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -34,3 +36,11 @@ def upload_files_to_s3(folder_path: str,
             except Exception as e:
                 print(f"Error uploading file {file}: {e}")
     return file_urls
+
+def cleanup():
+    folder_path = '/tmp/output'
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+        print(f"Folder '{folder_path}' has been removed.")
+    else:
+        print(f"Folder '{folder_path}' does not exist.")

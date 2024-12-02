@@ -1,7 +1,7 @@
 import json
 import os
 from recorder2 import main
-from s3_connect import upload_files_to_s3
+from s3_connect import upload_files_to_s3, cleanup
 
 def handler(event, context):
     print(event)
@@ -65,7 +65,7 @@ def handler(event, context):
     try:
         main(username, password, links)
         urls = upload_files_to_s3('/tmp/output', s3_bucket_url)
-
+        cleanup()
         return {
             "statusCode": 200,
             "body": json.dumps(
