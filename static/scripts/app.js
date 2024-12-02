@@ -30,7 +30,6 @@ document.getElementById('parse-btn').addEventListener('click', function() {
             label.innerText = 'Results:';
             linksContainer.classList = 'result-links-list form-group';
             linksContainer.appendChild(label); // Append the link to the container
-
             links.forEach((link, index) => {
                 const linkElement = document.createElement('a'); // Create an anchor element
                 linkElement.href = link; // Set the href attribute
